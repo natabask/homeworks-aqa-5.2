@@ -1,5 +1,9 @@
 package ru.netology.authorization.test;
 
+import com.codeborne.selenide.logevents.SelenideLogger;
+import io.qameta.allure.selenide.AllureSelenide;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +18,18 @@ import static ru.netology.authorization.data.DataGenerator.getRandomLogin;
 import static ru.netology.authorization.data.DataGenerator.getRandomPassword;
 
 public class AuthTest {
+
+    String errorMessage = "Ошибка! Неверно указан логин или пароль";
+
+    @BeforeAll
+    static void setUpAll() {
+        SelenideLogger.addListener("allure", new AllureSelenide());
+    }
+
+    @AfterAll
+    static void tearDownAll() {
+        SelenideLogger.removeListener("allure");
+    }
 
     @BeforeEach
     void setup() {
@@ -36,6 +52,7 @@ public class AuthTest {
         $("[data-test-id=password] input").setValue(notRegisteredUser.getPassword());
         $("[data-test-id=action-login]").click();
         $("[data-test-id=error-notification]").shouldBe(visible);
+        $("[data-test-id=error-notification] .notification__content").shouldHave(exactText(errorMessage));
     }
 
     @Test
@@ -45,6 +62,7 @@ public class AuthTest {
         $("[data-test-id=password] input").setValue(blockedUser.getPassword());
         $("[data-test-id=action-login]").click();
         $("[data-test-id=error-notification]").shouldBe(visible);
+        $("[data-test-id=error-notification] .notification__content").shouldHave(exactText("Ошибка! Пользователь заблокирован"));
     }
 
     @Test
@@ -55,6 +73,7 @@ public class AuthTest {
         $("[data-test-id=password] input").setValue(registeredUser.getPassword());
         $("[data-test-id=action-login]").click();
         $("[data-test-id=error-notification]").shouldBe(visible);
+        $("[data-test-id=error-notification] .notification__content").shouldHave(exactText(errorMessage));
     }
 
     @Test
@@ -65,5 +84,6 @@ public class AuthTest {
         $("[data-test-id=password] input").setValue(wrongPassword);
         $("[data-test-id=action-login]").click();
         $("[data-test-id=error-notification]").shouldBe(visible);
+        $("[data-test-id=error-notification] .notification__content").shouldHave(exactText(errorMessage));
     }
 }
